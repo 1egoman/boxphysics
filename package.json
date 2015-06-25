@@ -1,0 +1,16 @@
+{
+  "name": "mandl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "coffee index.coffee"
+  },
+  "author": "Ryan Gaus <rsg1egoman@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "underscore": "^1.8.3",
+    "uuid": "^2.0.1"
+  }
+}
