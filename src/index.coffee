@@ -7,7 +7,7 @@ module.exports = (env, argv) ->
   # larger box
   map.box
     x: 1
-    y: 0
+    y: 10
     w: 5
     h: 5
 
@@ -27,3 +27,9 @@ module.exports = (env, argv) ->
     h: 3
 
   map.redraw()
+
+  setInterval ->
+    map.render()
+    console.log "rendered tick #{map.ticks}"
+    map.redraw()
+  , 1000

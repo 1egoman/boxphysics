@@ -17,12 +17,44 @@ class TextMap
     @overwriteableToPlus = ['▓'].concat @cornerChars
 
 
+    # physics stuff
+    @ticks = 0 # our time measurer
+    @g = -1
+
+
   box: (opts) ->
     @objects.push
       type: "box"
       id: uuid.v4()
       data: opts
 
+
+
+
+  # render the motions
+  ###
+  x = vit + .5at^2
+  ###
+  render: ->
+    @ticks += 1
+
+    for obj in @objects
+      obj.data.vi or= 0 # start with zero initial velocity
+
+      # take care of gravity
+      y = (obj.data.vi * @ticks) + (.5 * @g * @ticks * @ticks)
+      obj.data.y = y
+      obj.data.vi = y / @ticks # distance / time
+      # reset velocity/displacement if on ground
+      if obj.data.y < 0
+        obj.data.y = 0
+        obj.data.vi = 0
+
+      console.log obj.data
+
+
+
+  # draw the graphics to the screen
   redraw: ->
     renderlist = _.flatten @objects
     renderbuffer = []
@@ -69,7 +101,9 @@ class TextMap
     glyph = glyph.split('\n').map (ln) -> "#{[0...x].map(-> '  ').join ''}#{ln}"
 
     # y offset
-    glyph.unshift [0...@rh-y-glyph.length].map(-> [0...glyph[0].length].map(-> ' ').join '').join '\n'
+    yoff = @rh - y - glyph.length
+    yoff = @rh if yoff < 0
+    glyph.unshift [0...yoff].map(-> [0...glyph[0].length].map(-> ' ').join '').join '\n'
 
     glyph.join '\n'
 
