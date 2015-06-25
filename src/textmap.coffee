@@ -7,6 +7,15 @@ class TextMap
     @objects = []
     [@rw, @rh] = [20, 10]
 
+    # these chars make up the corners of glyphs
+    @cornerChars = ['+', '\u253C', '\u250C', '\u2510', '\u2514', '\u2518']
+
+    # these chars make up the edges to the glyphs
+    @lineChars = ['\u2502', '\u2500']
+
+    # these characters always take preferance over a + or other corner char
+    @overwriteableToPlus = ['▓'].concat @cornerChars
+
 
   box: (opts) ->
     @objects.push
@@ -25,7 +34,6 @@ class TextMap
       switch obj.type
         when 'box', 'cube' then renderbuffer.push @drawBox obj
 
-
     # create map
     renderscreen = [0...rh].map -> [0...rw].map -> ' '
       
@@ -35,7 +43,13 @@ class TextMap
       for i in [0...rh]
         for j in [0...rw]
           try
-            if b[i][j] not in [' ', null, undefined] and renderscreen[i][j] isnt '+'
+            if b[i][j] not in [' ', null, undefined] and (b[i][j] in @overwriteableToPlus or renderscreen[i][j] not in @cornerChars)
+              # check about corners to be sure we are doing the right
+              # replacements - for now, all corners that are to be replaced
+              # go into pluses
+              if b[i][j] in @cornerChars and (renderscreen[i][j] in @lineChars or renderscreen[i][j] in @cornerChars)
+                b[i][j] = '\u253C'
+
               renderscreen[i][j] = b[i][j] or ' '
           catch error
             renderscreen[i][j] = renderscreen[i][j] or ' '
@@ -64,14 +78,24 @@ class TextMap
   drawBox: (obj) ->
     {x, y, w, h} = obj.data
 
-    # render the initial horisontal expanse and the final one
-    horisontalExpanse = "+#{[0...w-2].map(-> '―').join ''}+"
 
-    # for each vertical line
-    middle = [0...h-2].map(-> "\u2502#{[0...w-2].map(-> ' ').join ''}\u2502").join '\n'
+    if obj.data.filled
+      # for a filled box, the middle is just the filled character
+      middle = [0...h-2].map(-> [0...w].map(-> obj.data.filledWith or '▓').join '').join '\n'
+      topHorisontalExpanse = middle
+      botHorisontalExpanse = middle
+    else
+      # unfilled box
+
+      # for each vertical line
+      middle = [0...h-2].map(-> "\u2502#{[0...w-2].map(-> ' ').join ''}\u2502").join '\n'
+
+      # render the initial horisontal expanse and the final one
+      topHorisontalExpanse = "\u250C#{[0...w-2].map(-> '―').join ''}\u2510"
+      botHorisontalExpanse = "\u2514#{[0...w-2].map(-> '―').join ''}\u2518"
 
     # return the finished box
-    box = _.flatten([horisontalExpanse, middle, horisontalExpanse]).join '\n'
+    box = _.flatten([topHorisontalExpanse, middle, botHorisontalExpanse]).join '\n'
 
     # offset the correct distance
     @offsetGlyph x, y, box
