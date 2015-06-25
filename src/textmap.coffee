@@ -35,7 +35,7 @@ class TextMap
       for i in [0...rh]
         for j in [0...rw]
           try
-            if b[i][j] in ['―', '\u2502', '+'] and renderscreen[i][j] isnt '+'
+            if b[i][j] not in [' ', null, undefined] and renderscreen[i][j] isnt '+'
               renderscreen[i][j] = b[i][j] or ' '
           catch error
             renderscreen[i][j] = renderscreen[i][j] or ' '
@@ -60,7 +60,7 @@ class TextMap
     glyph.join '\n'
 
 
-
+  # draw a normal box
   drawBox: (obj) ->
     {x, y, w, h} = obj.data
 
